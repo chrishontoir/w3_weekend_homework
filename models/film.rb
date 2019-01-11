@@ -55,5 +55,24 @@ class Film
     return result.count
   end
 
+  def screenings()
+    sql = "SELECT screenings.* FROM screenings INNER JOIN films ON films.id = screenings.film_id WHERE screenings.film_id = $1"
+    values = [@id]
+    screenings = SqlRunner.run(sql, values)
+    return screenings.map {|screening| Screening.new(screening)}
+  end
+
+  def popular_time()
+    array = screenings()
+    sold = 0
+    for item in array
+      if item.tickets_sold() > sold
+        sold = item.tickets_sold()
+        most_popular = item.time
+      end
+    end
+    return most_popular
+  end
+
 
 end
