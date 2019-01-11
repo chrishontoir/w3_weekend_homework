@@ -16,6 +16,7 @@ class Ticket
     values = [@customer_id, @film_id]
     ticket = SqlRunner.run(sql, values).first
     @id = ticket['id'].to_i
+    update_funds()
   end
 
   def update()
@@ -41,6 +42,22 @@ class Ticket
     sql = "DELETE FROM tickets"
     values = []
     SqlRunner.run(sql, values)
+  end
+
+  def update_funds
+    new_funds = new_fund_value()
+    sql = "UPDATE customers SET funds = $1 WHERE id = $2"
+    values = [new_funds, @customer_id]
+    SqlRunner.run(sql, values)
+    return "Funds updated"
+  end
+
+  def new_fund_value()
+    sql = "SELECT * FROM tickets INNER JOIN films ON films.id = tickets.film_id INNER JOIN customers ON customers.id = tickets.customer_id WHERE tickets.id = $1"
+    values = [@id]
+    result = SqlRunner.run(sql, values).first
+    new_funds = result['funds'].to_i - result['price'].to_i
+    return new_funds
   end
 
 
